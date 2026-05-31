@@ -251,3 +251,43 @@ cat("  - Total cells:", nrow(getCellColData(proj)), "\n")
 cat("  - Samples:", length(unique(proj$newSample)), "\n")
 cat("  - Output directory:", proj_dir, "\n")
 cat("=", rep("=", 60), "\n")
+
+# ============================================
+# 9. QC Visualization with ArchR
+# ============================================
+
+# 计算核小体信号
+proj$NucleosomeSignal <- proj$nMonoFrags / proj$nDiFrags
+
+# 生成4个指标的图
+p_tss_ridge <- plotGroups(proj, groupBy = "exercise_group", colorBy = "cellColData", 
+                          name = "TSSEnrichment", plotAs = "ridges")
+
+p_tss_violin <- plotGroups(proj, groupBy = "exercise_group", colorBy = "cellColData", 
+                           name = "TSSEnrichment", plotAs = "violin", alpha = 0.4, addBoxPlot = TRUE)
+
+p_frags <- plotGroups(proj, groupBy = "exercise_group", colorBy = "cellColData", 
+                      name = "log10(nFrags)", plotAs = "violin", alpha = 0.4, addBoxPlot = TRUE)
+
+p_nucleo <- plotGroups(proj, groupBy = "exercise_group", colorBy = "cellColData", 
+                       name = "NucleosomeSignal", plotAs = "violin", alpha = 0.4, addBoxPlot = TRUE)
+
+p_blacklist <- plotGroups(proj, groupBy = "exercise_group", colorBy = "cellColData", 
+                          name = "BlacklistRatio", plotAs = "violin", alpha = 0.4, addBoxPlot = TRUE)
+
+# 保存（ArchR内置函数）
+plotPDF(p_tss_ridge, p_tss_violin, p_frags, p_nucleo, p_blacklist,
+        name = "QC_Statistics.pdf",
+        ArchRProj = proj,
+        addDOC = FALSE,
+        width = 10,
+        height = 8)
+
+cat("QC plots saved: QC_Statistics.pdf\n")
+
+
+
+
+
+
+
