@@ -4,6 +4,7 @@
 # DAR analysis for scATAC-seq data
 # Step 1: Call peaks
 # Step 2: Extract cell subsets, match cells, run DAR
+# Step 3: Annotate peaks with nearest genes and region types
 # ============================================
 
 library(ArchR)
@@ -15,7 +16,7 @@ addArchRThreads(threads = 8)
 addArchRGenome("hg38")
 
 # ============================================
-# Step 1: Call peaks (RUN ONCE per project)
+# Step 1: Call peaks 
 # ============================================
 
 prepare_peak_project <- function(
@@ -51,6 +52,7 @@ prepare_peak_project <- function(
 
 # ============================================
 # Step 2: Extract subsets, match, and run DAR
+# Step 3: Annotate peaks with nearest genes
 # ============================================
 
 run_DAR_analysis <- function(
@@ -134,7 +136,10 @@ run_DAR_analysis <- function(
       next
     }
     
+    # ============================================
     # DAR analysis
+    # ============================================
+    
     peakMarkers <- getMarkerFeatures(
       ArchRProj = proj_matched,
       useMatrix = "PeakMatrix",
@@ -155,11 +160,15 @@ run_DAR_analysis <- function(
     
     # Save significant peaks
     sig_markers <- getMarkers(peakMarkers, cutOff = "FDR <= 0.05 & abs(Log2FC) >= 0.25")
+    
     if (!is.null(sig_markers$EX) && nrow(sig_markers$EX) > 0) {
+      
+      # Save basic significant peaks
       write.csv(as.data.frame(sig_markers$EX),
                 file.path(ct_dir, paste0(ct, "_significant_peaks.csv")),
                 row.names = FALSE)
       
+      # Up and down regulated
       up <- getMarkers(peakMarkers, cutOff = "FDR <= 0.05 & Log2FC >= 0.25")
       down <- getMarkers(peakMarkers, cutOff = "FDR <= 0.05 & Log2FC <= -0.25")
       
@@ -167,7 +176,7 @@ run_DAR_analysis <- function(
       n_down <- ifelse(is.null(down$EX), 0, nrow(down$EX))
       cat("  Up:", n_up, "| Down:", n_down, "\n")
       
-      # Save BED files
+      # Save BED files for GREAT
       if (n_up > 0) {
         write.table(
           data.frame(chrom = up$EX$seqnames,
@@ -186,6 +195,42 @@ run_DAR_analysis <- function(
           sep = "\t", col.names = FALSE, row.names = FALSE, quote = FALSE
         )
       }
+      
+      # ============================================
+      # Annotate peaks with nearest genes and region types
+      # ============================================
+      
+      cat("  Annotating peaks with nearest genes...\n")
+      
+      # Get peak set from project
+      peak_gr <- getPeakSet(proj_matched)
+      
+      # Prepare target peaks as GRanges
+      target_gr <- GRanges(
+        seqnames = sig_markers$EX$seqnames,
+        ranges = IRanges(start = sig_markers$EX$start, end = sig_markers$EX$end)
+      )
+      
+      # Find nearest peaks
+      nearest_hits <- distanceToNearest(target_gr, peak_gr)
+      
+      # Extract annotation info
+      matched_data <- data.frame(
+        nearestPeakType = peak_gr[subjectHits(nearest_hits)]$peakType,
+        distToTSS = peak_gr[subjectHits(nearest_hits)]$distToTSS,
+        nearestGene = peak_gr[subjectHits(nearest_hits)]$nearestGene,
+        distanceToNearestPeak = mcols(nearest_hits)$distance
+      )
+      
+      # Combine with original data
+      sig_annotated <- cbind(as.data.frame(sig_markers$EX), matched_data)
+      
+      # Save annotated results
+      write.csv(sig_annotated,
+                file.path(ct_dir, paste0(ct, "_significant_peaks_annotated.csv")),
+                row.names = FALSE)
+      cat("  Annotated peaks saved\n")
+      
     } else {
       cat("  No significant peaks\n")
     }
@@ -203,7 +248,7 @@ run_DAR_analysis <- function(
 # Usage
 # ============================================
 
-# Step 1: Prepare project with peaks
+# Step 1: Prepare project with peaks (run once)
 # prepare_peak_project(
 #   project_path = "/path/to/ArchRProject/",
 #   output_dir = "/path/to/ArchRProject_with_peaks/",
