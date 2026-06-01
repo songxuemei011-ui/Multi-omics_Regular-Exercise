@@ -113,9 +113,7 @@ rnaPDC <- rownames(seRNA@meta.data[seRNA$celltype_l3 == "pDC", ])
 
 cat("  RNA subsets extracted:\n")
 cat("    cMono:", length(rnaCMono), "cells\n")
-cat("    intMono:", length(rnaIntMono), "cells\n")
 cat("    ncMono:", length(rnaNCMono), "cells\n")
-cat("    cDC:", length(rnaCDC), "cells\n")
 cat("    pDC:", length(rnaPDC), "cells\n")
 
 # ============================================
