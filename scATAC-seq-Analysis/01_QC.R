@@ -253,13 +253,13 @@ cat("  - Output directory:", proj_dir, "\n")
 cat("=", rep("=", 60), "\n")
 
 # ============================================
-# 9. QC Visualization with ArchR
+# QC Visualization with ArchR
 # ============================================
 
-# 计算核小体信号
+# Calculate nucleosome signal
 proj$NucleosomeSignal <- proj$nMonoFrags / proj$nDiFrags
 
-# 生成4个指标的图
+# Generate QC plots
 p_tss_ridge <- plotGroups(proj, groupBy = "exercise_group", colorBy = "cellColData", 
                           name = "TSSEnrichment", plotAs = "ridges")
 
@@ -275,7 +275,7 @@ p_nucleo <- plotGroups(proj, groupBy = "exercise_group", colorBy = "cellColData"
 p_blacklist <- plotGroups(proj, groupBy = "exercise_group", colorBy = "cellColData", 
                           name = "BlacklistRatio", plotAs = "violin", alpha = 0.4, addBoxPlot = TRUE)
 
-# 保存（ArchR内置函数）
+# Save plots
 plotPDF(p_tss_ridge, p_tss_violin, p_frags, p_nucleo, p_blacklist,
         name = "QC_Statistics.pdf",
         ArchRProj = proj,
