@@ -1,7 +1,9 @@
 # ============================================
 # ArchR Analysis Pipeline for Single-cell ATAC-seq
 # ============================================
-# 
+# # Data source:
+#   - Fragment files downloaded from CIMA database (https://db.cngb.org/trueblood/cima/resource)
+#   - Sample list and metadata used in this study are provided in Supplementary Table 1
 # This script performs:
 #   1. Create Arrow files from fragment files
 #   2. Doublet detection and filtering
