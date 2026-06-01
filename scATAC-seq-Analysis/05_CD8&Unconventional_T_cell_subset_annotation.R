@@ -186,9 +186,9 @@ proj <- addGeneIntegrationMatrix(
 
 cat("\nStep 8: Cell type annotation...\n")
 
-original_labels <- getCellColData(proj, "predictedGroup_Un")[, 1]
+original_labels <- getCellColData(proj, "predictedGroup_Sup")[, 1]
 
-# Merge rules
+# Merge rules（n<50)
 new_labels <- ifelse(
   original_labels %in% c("gdT1", "gdT2"),
   "gdT",
