@@ -29,7 +29,7 @@ OUTPUT_DIR <- "results/ArchR/"           # Output directory for Arrow files and 
 METADATA_FILE <- "data/sample_metadata.csv"  # Sample metadata CSV
 
 # QC thresholds
-MIN_TSS <- 6
+MIN_TSS <- 10
 MIN_FRAGS <- 1000
 MAX_FRAGS <- 100000
 MAX_NUCLEOSOME_SIGNAL <- 4
