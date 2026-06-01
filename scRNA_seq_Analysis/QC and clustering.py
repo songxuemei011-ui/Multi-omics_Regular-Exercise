@@ -1,6 +1,9 @@
 """
 Quality Control and Gene Filtering for Single-cell RNA-seq Data
-
+Data source:
+    - Raw expression matrix downloaded from CIMA database (https://cima.cngb.org/)
+    - The matrix was already pre-processed and cell-type annotated by CIMA
+    - Sample list and metadata used in this study are provided in Supplementary Table 1
 This script performs:
     - Cell filtering (genes, UMIs, mitochondrial percentage)
     - Doublet removal (Scrublet)
